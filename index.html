@@ -1,0 +1,169 @@
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <title>All year round</title>
+    </head>
+    <script type="text/javascript">
+        var months = [  "January", "February", "March", 
+                        "April", "May", "June", 
+                        "July", "August", "September", 
+                        "October", "November", "December" ];
+
+        var month_colors = [    "#0B5394", "#3D85C6", "#6FA8DC", 
+                                "#44C2BB", "#61C455", "#7DC43C", 
+                                "#9DC440", "#F1C232", "#E69138", 
+                                "#CC0000", "#990000", "#134F5C" ];
+        var daynames = [ "Su", "Mo", "Tu", "We", "Th", "Fr", "Sa" ];
+
+        function draw() {
+            var canvas = document.getElementById("cv");
+            if (canvas.getContext) {
+                document.getElementById("fuckoff").style.display = "none";
+                
+                var year = window.location.hash ? 1*window.location.hash.slice(1) : (new Date()).getFullYear();
+                var today = new Date();
+
+                if (today.toLocaleFormat) {
+                    for (var i=0;i<7;i++) {
+                        var dt = new Date(1010,0,i);
+                        daynames[i] = dt.toLocaleFormat("%a");
+                    }
+                    for (var i=0;i<12;i++) {
+                        var dt = new Date(1010,i,1);
+                        months[i] = dt.toLocaleFormat("%B");
+                    }
+                }
+
+                var ctx = canvas.getContext('2d');
+                canvas.width  = window.innerWidth;
+                canvas.height = window.innerHeight;
+
+                var radius = ((canvas.width < canvas.height) ? canvas.width : canvas.height)/2;
+                var extrad = radius*1.0;
+                var searad = radius*0.5;
+                ctx.font = "16px Serif";
+                ctx.translate(canvas.width/2,canvas.height/2);
+                var maxh = 16;
+                var wc=54;
+                var dayrad = extrad-2*maxh;
+                ctx.save();
+                var moro = Math.PI*(1.0-2.0/wc)/12;
+                var daro = Math.PI/wc;
+                ctx.rotate(daro);
+                for (var month=0; month<12; month++) {
+                    ctx.beginPath();
+                    //ctx.moveTo(0,-dayrad);
+                    //ctx.lineTo(0,-extrad);
+                    ctx.stroke();
+                    ctx.rotate(Math.PI/12);
+                   
+                    var monthname = months[month];
+                    ctx.save();
+                    ctx.fillStyle=month_colors[month];
+                    ctx.beginPath();
+                    ctx.arc(0,0,extrad, -Math.PI/2-moro, -Math.PI/2+moro);
+                    ctx.arc(0,0,dayrad, -Math.PI/2+moro, -Math.PI/2-moro, true);
+                    ctx.fill();
+                    ctx.restore();
+                    //ctx.fillStyle = ((month>=10)||(month<2)) ? "#FFF" : "#000";
+                    ctx.fillStyle = ((new Date(year,month))<=today) ? "#FFF" : "#000";
+                    var meas = ctx.measureText(monthname.toString());
+                    /* Following shit is pretty much broken. I am unable to get it working even on my firefox.
+                    var height = Math.abs(meas.actualBoundingBoxAscent-meas.actualBoundingBoxDescent);
+                    if (height > maxh)
+                        maxh = height;
+                    */
+                    ctx.fillText(monthname, -meas.width/2, -extrad+maxh*1.5);
+                    ctx.rotate(moro);
+                }
+                ctx.restore();
+                //alert(dayrad);
+                var daysize = Math.ceil((dayrad-searad)/7/2);
+                //var daysize = 10;
+                //alert(daysize);
+                ctx.save();
+                ctx.font = daysize+"px Serif";
+                var daycount;
+                if (year%400==0)
+                    daycount=366;
+                else if (year%100==0)
+                    daycount=365;
+                else if (year%4==0)
+                    daycount=366;
+                else
+                    daycount=365;
+                for (var i=0; i<7; i++) {
+                    var text = daynames[i];
+                    ctx.fillText(text,-ctx.measureText(text).width/2,-(dayrad-searad)*(6-i)/7 - searad);
+                }
+                ctx.rotate(daro*2);
+                for (var i=1; i<=daycount; i++) {
+                    var dt = new Date(year,0,i);
+                    var cd = dt.getDay();
+                    var month = dt.getMonth();
+                    //ctx.fillStyle = ((month>=10)||(month<2)) ? "#FFF" : "#000";
+                    ctx.fillStyle = (dt<=today) ? "#FFF" : "#000";
+                    //var cw = i/7;
+                    var text = dt.getDate();
+                    if (i!=-91) {
+                        var hu = (dayrad-searad)*(7-cd)/7 + searad - daysize/2;
+                        var hl = (dayrad-searad)*(6-cd)/7 + searad - daysize/2;
+                        ctx.save();
+                        ctx.fillStyle=month_colors[month];
+                        ctx.beginPath();
+                        //ctx.moveTo(0,-hl);
+                        ctx.arc(0,0,hl, -Math.PI/2-Math.PI/wc, -Math.PI/2+Math.PI/wc);
+                        ctx.arc(0,0,hu, -Math.PI/2+Math.PI/wc, -Math.PI/2-Math.PI/wc, true);
+                        //ctx.lineTo(0,-hl);
+                        ctx.fill();
+                        ctx.restore();
+                        //ctx.stroke();
+                    }
+                    ctx.fillText(text,-ctx.measureText(text).width/2,-(dayrad-searad)*(6-cd)/7 - searad);
+                    
+                    if ((cd==6)||(i==daycount)) {
+                        ctx.rotate(Math.PI/wc);
+                        /*ctx.beginPath();
+                        ctx.moveTo(0,-searad+daysize/2);
+                        ctx.lineTo(0,-dayrad);
+                        ctx.stroke();*/
+                        ctx.rotate(Math.PI/wc);
+                    }
+                    //alert(dt);
+                }
+                ctx.restore();
+                
+                ctx.save();
+                /*ctx.beginPath();
+                //ctx.arc(0,0, extrad, 0, Math.PI*2)
+                //ctx.arc(0,0, dayrad, 0, Math.PI*2)
+                ctx.stroke();
+                    ctx.beginPath();
+                    ctx.moveTo(40,0);
+                    ctx.lineTo(30,0);
+                    ctx.arc(0,0,30, 0, Math.PI/2);
+                    ctx.arc(0,0,40, Math.PI/2, 0, true);
+                    ctx.fill();
+                    //ctx.stroke(); */
+                /*ctx.beginPath();
+                ctx.moveTo(0,10);
+                ctx.lineTo(0,20);
+                ctx.rotate(Math.PI/2);
+                ctx.lineTo(0,30);
+                ctx.stroke();*/
+                ctx.restore();
+
+                var yheight = Math.ceil(searad/2);
+                ctx.font = yheight + "px Serif";
+                var ymeas = ctx.measureText(year);
+                ctx.fillText(year, -ymeas.width/2, yheight*0.40);
+            } else {
+                document.getElementById("fuckoff").style.display = "";
+            }
+        }
+    </script>
+    <body onload="draw();">
+        <canvas id="cv" style="width: 100%; height: 100%;"/>
+        <h1 id="fuckoff">Hi there and fuck off. Go get yourself a BROWSER.</h1>
+    </body>
+</html>
