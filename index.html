@@ -21,8 +21,25 @@
                 if (canvas.getContext) {
                     document.getElementById("fuckoff").style.display = "none";
 
-                    var year = window.location.hash ? 1*window.location.hash.slice(1) : (new Date()).getFullYear();
+                    var year = (new Date()).getFullYear();
                     var today = new Date();
+                    //year = 2007; today = new Date(2007,11,3);
+                    var rotate = 0.0;
+                    var wc = 54;
+                    if (window.location.hash)
+                        if (window.location.hash=="#rot") {
+                            if ((new Date(year,0)<=today)&&(today < new Date(year+1,0))) {
+                                var fwe;
+                                for (var i=1;i<=7;i++) {
+                                    fwe = new Date(year,0,i);
+                                    if (fwe.getDay()==6) break;
+                                }
+                                var nwd = new Date(today);
+                                nwd.setHours(0,0,0);
+                                rotate = (Math.floor(((today - fwe)/86400-1000)/7000)+2)*Math.PI*2/wc;
+                            }
+                        } else
+                            year = 1*window.location.hash.slice(1);
 
                     if (today.toLocaleFormat) {
                         for (var i=0;i<7;i++) {
@@ -45,12 +62,11 @@
                     ctx.font = "20px "+font;
                     ctx.translate(canvas.width/2,canvas.height/2);
                     var maxh = 16;
-                    var wc = 54;
                     var dayrad = extrad-2*maxh;
                     ctx.save();
                     var moro = Math.PI*(1.0-2.0/wc)/12;
                     var daro = Math.PI/wc;
-                    ctx.rotate(daro);
+                    ctx.rotate(daro-rotate);
                     for (var month=0; month<12; month++) {
                         ctx.beginPath();
                         ctx.stroke();
@@ -87,6 +103,7 @@
                         daycount=366;
                     else
                         daycount=365;
+                    ctx.rotate(-rotate);
                     for (var i=0; i<7; i++) {
                         var text = daynames[i];
                         ctx.fillText(text,-ctx.measureText(text).width/2,-(dayrad-searad)*(6-i)/7 - searad);
