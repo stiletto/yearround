@@ -14,13 +14,13 @@
                                     "#9DC440", "#F1C232", "#E69138", 
                                     "#CC0000", "#990000", "#134F5C" ];
             var daynames = [ "Su", "Mo", "Tu", "We", "Th", "Fr", "Sa" ];
-            var font = "Droid Sans";
+            var font = "Serif"; // "Droid Sans"; -- Fonts from Google Font API doesn't work in Google Chrome's canvas.
 
             function draw() {
                 var canvas = document.getElementById("cv");
                 if (canvas.getContext) {
                     document.getElementById("fuckoff").style.display = "none";
-                    
+
                     var year = window.location.hash ? 1*window.location.hash.slice(1) : (new Date()).getFullYear();
                     var today = new Date();
 
@@ -55,7 +55,7 @@
                         ctx.beginPath();
                         ctx.stroke();
                         ctx.rotate(Math.PI/12);
-                       
+
                         var monthname = months[month];
                         ctx.save();
                         ctx.fillStyle=month_colors[month];
@@ -110,12 +110,12 @@
                             ctx.restore();
                         }
                         ctx.fillText(text,-ctx.measureText(text).width/2,-(dayrad-searad)*(6-cd)/7 - searad);
-                        
+
                         if (cd==6)
                             ctx.rotate(Math.PI*2/wc);
                     }
                     ctx.restore();
-                    
+
                     var yheight = Math.ceil(searad/2);
                     ctx.font = yheight + "px "+font;
                     var ymeas = ctx.measureText(year);
