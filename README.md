@@ -8,6 +8,13 @@ yearround in action: http://www.blasux.ru/static/yearround.html
 
 Year 1010: http://www.blasux.ru/static/yearround.html#1010
 
-Rotated version: http://www.blasux.ru/static/yearround.html#rot
+Calendar accepts following parameters:
+ * rot -- rotate to current week
+ * mon -- first day of week is monday
+ * nohl -- do not highlight days from Jan 1 to today, make all days white
+ * <year> -- show calendar for <year> instead of current year. implies nohl, no rot
+
+Example, monday-first calendar of 2002: http://www.blasux.ru/static/yearround.html#mon,2002
+
 
 If you are a Firefox user, it will take advantage of Date().toLocaleFormat() to translate month and day names.

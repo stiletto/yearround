@@ -14,8 +14,18 @@
                                     "#9DC440", "#F1C232", "#E69138", 
                                     "#CC0000", "#990000", "#134F5C" ];
             var daynames = [ "Su", "Mo", "Tu", "We", "Th", "Fr", "Sa" ];
+            var monfirst = false;
+            var hlcd = true;
             var font = "Sans-Serif"; // "Droid Sans"; -- Fonts from Google Font API doesn't work in Google Chrome's canvas.
+            var args = window.location.hash.slice(1).split(',')
 
+            function getCd(dt) {
+                var cd = dt.getDay();
+                if (monfirst)
+                    if (cd>0) cd-=1;
+                    else cd=6;
+                return cd;
+            }
             function draw() {
                 var canvas = document.getElementById("cv");
                 if (canvas.getContext) {
@@ -26,20 +36,6 @@
                     //year = 2007; today = new Date(2007,11,3);
                     var rotate = 0.0;
                     var wc = 54;
-                    if (window.location.hash)
-                        if (window.location.hash=="#rot") {
-                            if ((new Date(year,0)<=today)&&(today < new Date(year+1,0))) {
-                                var fwe;
-                                for (var i=1;i<=7;i++) {
-                                    fwe = new Date(year,0,i);
-                                    if (fwe.getDay()==6) break;
-                                }
-                                var nwd = new Date(today);
-                                nwd.setHours(0,0,0);
-                                rotate = (Math.floor(((today - fwe)/86400-1000)/7000)+2)*Math.PI*2/wc;
-                            }
-                        } else
-                            year = 1*window.location.hash.slice(1);
 
                     if (today.toLocaleFormat) {
                         for (var i=0;i<7;i++) {
@@ -49,6 +45,37 @@
                         for (var i=0;i<12;i++) {
                             var dt = new Date(1010,i,1);
                             months[i] = dt.toLocaleFormat("%B");
+                        }
+                    }
+
+                    if (args.indexOf("mon") != -1) {
+                        monfirst = true;
+                        var sunday = daynames.shift();
+                        daynames.push(sunday);
+                    }
+
+                    if (args.indexOf("nohl") != -1) {
+                        hlcd = false;
+                    }
+
+                    if (args.indexOf("rot") != -1) {
+                            if ((new Date(year,0)<=today)&&(today < new Date(year+1,0))) {
+                                var fwe;
+                                for (var i=1;i<=7;i++) {
+                                    fwe = new Date(year,0,i);
+                                    if (getCd(fwe)==6) break;
+                                }
+                                var nwd = new Date(today);
+                                nwd.setHours(0,0,0);
+                                rotate = (Math.floor(((today - fwe)/86400-1000)/7000)+2)*Math.PI*2/wc;
+                            }
+                    } else {
+                        for (var i in args) {
+                            var testyear = args[i]*1;
+                            if (args[i] && !isNaN(testyear)) {
+                                year = testyear;
+                                hlcd = false;
+                            }
                         }
                     }
 
@@ -80,7 +107,7 @@
                         ctx.arc(0,0,dayrad, -Math.PI/2+moro, -Math.PI/2-moro, true);
                         ctx.fill();
                         ctx.restore();
-                        ctx.fillStyle = ((new Date(year,month))<=today) ? "#FFF" : "#000";
+                        ctx.fillStyle = ((new Date(year,month))<=today)||!hlcd ? "#FFF" : "#000";
                         var meas = ctx.measureText(monthname.toString());
                         /* Following shit is pretty much broken. I am unable to get it working even on my firefox.
                         var height = Math.abs(meas.actualBoundingBoxAscent-meas.actualBoundingBoxDescent);
@@ -111,9 +138,9 @@
                     ctx.rotate(daro*2);
                     for (var i=1; i<=daycount; i++) {
                         var dt = new Date(year,0,i);
-                        var cd = dt.getDay();
+                        var cd = getCd(dt);
                         var month = dt.getMonth();
-                        ctx.fillStyle = (dt<=today) ? "#FFF" : "#000";
+                        ctx.fillStyle = (dt<=today)||!hlcd ? "#FFF" : "#000";
                         var text = dt.getDate();
                         if (i!=-91) {
                             var hu = (dayrad-searad)*(7-cd)/7 + searad - daysize/2;
