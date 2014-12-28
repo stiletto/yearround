@@ -16,7 +16,7 @@
             var daynames = [ "Su", "Mo", "Tu", "We", "Th", "Fr", "Sa" ];
             var monfirst = false;
             var hlcd = true;
-            var font = "Sans-Serif"; // "Droid Sans"; -- Fonts from Google Font API doesn't work in Google Chrome's canvas.
+            var font = "Sans-Serif"; // "Droid Sans"; -- Fonts from Google Font API don't work in Google Chrome's canvas.
             var args = window.location.hash.slice(1).split(',')
 
             function getCd(dt) {
@@ -33,6 +33,7 @@
 
                     var year = (new Date()).getFullYear();
                     var today = new Date();
+                    today.setHours(18);
                     //year = 2007; today = new Date(2007,11,3);
                     var rotate = 0.0;
                     var wc = 54;
@@ -137,7 +138,7 @@
                     }
                     ctx.rotate(daro*2);
                     for (var i=1; i<=daycount; i++) {
-                        var dt = new Date(year,0,i);
+                        var dt = new Date(year,0,i,12);
                         var cd = getCd(dt);
                         var month = dt.getMonth();
                         ctx.fillStyle = (dt<=today)||!hlcd ? "#FFF" : "#000";
