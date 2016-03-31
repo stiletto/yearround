@@ -13,11 +13,28 @@
                                     "#44C2BB", "#61C455", "#7DC43C", 
                                     "#9DC440", "#F1C232", "#E69138", 
                                     "#CC0000", "#990000", "#134F5C" ];
-            var daynames = [ "Su", "Mo", "Tu", "We", "Th", "Fr", "Sa" ];
+            var month_darker_colors = [];
+            var defaultDaynames = [ "Su", "Mo", "Tu", "We", "Th", "Fr", "Sa" ];
             var monfirst = false;
             var hlcd = true;
             var font = "Sans-Serif"; // "Droid Sans"; -- Fonts from Google Font API don't work in Google Chrome's canvas.
-            var args = window.location.hash.slice(1).split(',')
+
+            if ((new Date(1010,1,1)).toLocaleFormat) {
+                for (var i=0;i<7;i++) {
+                    var dt = new Date(1010,0,i);
+                    defaultDaynames[i] = dt.toLocaleFormat("%a");
+                }
+                for (var i=0;i<12;i++) {
+                    var dt = new Date(1010,i,1);
+                    months[i] = dt.toLocaleFormat("%B");
+                }
+            }
+            for (var i=0;i<12;i++) {
+                var m = month_colors[i];
+                var coeff = 1.1;
+                month_darker_colors[i] = month_colors[i];
+                month_colors[i] = "rgb(" + Math.floor(parseInt(m.substr(1,2),16)*coeff) +","+ Math.floor(parseInt(m.substr(3,2),16)*coeff) + "," + Math.floor(parseInt(m.substr(5,2),16)*coeff)+")";
+            }
 
             function getCd(dt) {
                 var cd = dt.getDay();
@@ -27,7 +44,9 @@
                 return cd;
             }
             function draw() {
+                var args = window.location.hash.slice(1).split(',')
                 var canvas = document.getElementById("cv");
+                var daynames;
                 if (canvas.getContext) {
                     document.getElementById("fuckoff").style.display = "none";
 
@@ -38,26 +57,17 @@
                     var rotate = 0.0;
                     var wc = 54;
 
-                    if (today.toLocaleFormat) {
-                        for (var i=0;i<7;i++) {
-                            var dt = new Date(1010,0,i);
-                            daynames[i] = dt.toLocaleFormat("%a");
-                        }
-                        for (var i=0;i<12;i++) {
-                            var dt = new Date(1010,i,1);
-                            months[i] = dt.toLocaleFormat("%B");
-                        }
-                    }
 
+                    daynames = defaultDaynames.slice();
                     if (args.indexOf("mon") != -1) {
                         monfirst = true;
                         var sunday = daynames.shift();
                         daynames.push(sunday);
+                    } else {
+                        monfirst = false;
                     }
 
-                    if (args.indexOf("nohl") != -1) {
-                        hlcd = false;
-                    }
+                    hlcd = !(args.indexOf("nohl") != -1)
 
                     if (args.indexOf("rot") != -1) {
                             if ((new Date(year,0)<=today)&&(today < new Date(year+1,0))) {
@@ -147,7 +157,10 @@
                             var hu = (dayrad-searad)*(7-cd)/7 + searad - daysize/2;
                             var hl = (dayrad-searad)*(6-cd)/7 + searad - daysize/2;
                             ctx.save();
-                            ctx.fillStyle=month_colors[month];
+                            if ((dt.getDay()==0) || (dt.getDay()==6))
+                                ctx.fillStyle=month_darker_colors[month];
+                            else
+                                ctx.fillStyle=month_colors[month];
                             ctx.beginPath();
                             ctx.arc(0,0,hl, -Math.PI/2-Math.PI/wc, -Math.PI/2+Math.PI/wc);
                             ctx.arc(0,0,hu, -Math.PI/2+Math.PI/wc, -Math.PI/2-Math.PI/wc, true);
@@ -169,6 +182,7 @@
                     document.getElementById("fuckoff").style.display = "";
                 }
             }
+            window.addEventListener('hashchange', draw);
         </script>
     </head>
     <body onload="draw();">
